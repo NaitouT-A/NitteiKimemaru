@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "645325700593",
+    "project_id": "ez2gether-58514",
+    "storage_bucket": "ez2gether-58514.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:645325700593:android:6b54a8c8fce9b0c9339850",
+        "android_client_info": {
+          "package_name": "com.example.ez2gether"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "645325700593-cbron0uutcsu8m3iuf1rfgh3rsc5tebo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVrOu1DjKVF2tWm8huks1KHEtD7u1RQnQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "645325700593-cbron0uutcsu8m3iuf1rfgh3rsc5tebo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
