@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ez2gether/app/providers/auth_provider.dart';
-import 'package:ez2gether/app/views/create_schedule.view.dart';
+import 'package:go_router/go_router.dart';
 
 class MyHomePage extends ConsumerWidget {
   const MyHomePage({Key? key}) : super(key: key);
@@ -46,12 +46,7 @@ class MyHomePage extends ConsumerWidget {
                         .read(firebaseAuthProvider)
                         .signInAnonymously()
                         .then((_) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CreateScheduleView(),
-                        ),
-                      );
+                      context.go('/create');
                     }).catchError((e) {
                       debugPrint(e.toString());
                     });

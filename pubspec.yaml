@@ -33,6 +33,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   cloud_firestore: ^4.8.0
   crypto:
+  go_router: ^8.0.2
 
 dev_dependencies:
   flutter_test:

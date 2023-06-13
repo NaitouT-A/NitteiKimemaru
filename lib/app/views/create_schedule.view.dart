@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:ez2gether/app/providers/other_provider.dart';
 import 'package:ez2gether/app/services/firebase_auth_service.dart';
 import 'package:flutter/services.dart';
-import 'package:ez2gether/app/views/room_detail_view.dart';
+import 'package:ez2gether/app/router/router.dart';
 
 class CreateScheduleView extends ConsumerStatefulWidget {
   const CreateScheduleView({Key? key}) : super(key: key);
@@ -312,12 +312,7 @@ void _showDialog(
                   text:
                       'ルームID：${result['roomid']} パスワード：${result['password']}'));
               onCopy();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        RoomDetailsScreen(roomId: result['roomid']!)),
-              );
+              goRouter.go('/${result['roomid']}/${result['docId']}');
             },
           ),
         ],

@@ -4,15 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RoomDetailsScreen extends StatelessWidget {
   final String roomId;
+  final String documentId;
   final FirebaseAuthService auth = FirebaseAuthService();
 
-  RoomDetailsScreen({Key? key, required this.roomId}) : super(key: key);
+  RoomDetailsScreen({Key? key, required this.roomId, required this.documentId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Room Details'),
+        title: const Text('Room Details'),
       ),
       body: FutureBuilder<QuerySnapshot>(
         future: auth.getRoomDetails(roomId),
@@ -55,7 +57,7 @@ class RoomDetailsScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         text,
-        style: TextStyle(fontSize: 20),
+        style: const TextStyle(fontSize: 20),
       ),
     );
   }
