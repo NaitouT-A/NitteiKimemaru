@@ -1,4 +1,4 @@
-# ez2gether
+# Nitteikimemaru
 
 A new Flutter project.
 
