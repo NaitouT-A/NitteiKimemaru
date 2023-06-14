@@ -42,7 +42,7 @@ class FirebaseAuthService {
     String rawPassword = getRandomRoomPassword();
     String hashedPassword = hashPassword(rawPassword);
     try {
-      await schedules.add({
+      DocumentReference docRef = await schedules.add({
         'roomid': roomId,
         'password': hashedPassword,
         'uid': uid,
@@ -52,8 +52,10 @@ class FirebaseAuthService {
         'dueDate': Timestamp.fromDate(dueDate),
         'note': note,
       });
-      // Return the room ID and raw password
-      return {'roomid': roomId, 'password': rawPassword};
+      // get the document ID
+      String docId = docRef.id;
+      // Return the room ID, raw password and document ID
+      return {'roomid': roomId, 'password': rawPassword, 'docId': docId};
     } catch (e) {
       debugPrint(e.toString());
       rethrow;

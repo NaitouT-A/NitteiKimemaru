@@ -23,7 +23,7 @@ final goRouter = GoRouter(
           String? docId = state.pathParameters['docId'];
           if (roomId != null && docId != null) {
             return MaterialPage(
-                child: RoomDetailsScreen(roomId: roomId, documentId: docId));
+                child: RoomDetailsScreen(roomId: roomId, docId: docId));
           } else {
             throw Exception('Invalid room or document ID');
           }
