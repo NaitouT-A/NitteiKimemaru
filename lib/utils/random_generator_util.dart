@@ -4,7 +4,8 @@ import 'package:crypto/crypto.dart';
 
 int getRandomRoomId() {
   var rng = Random();
-  return 100000 + rng.nextInt(900000); // Generates a random 6 digit number
+  return 1000000000 +
+      rng.nextInt(9000000000); // Generates a random 10 digit number
 }
 
 String getRandomRoomPassword() {

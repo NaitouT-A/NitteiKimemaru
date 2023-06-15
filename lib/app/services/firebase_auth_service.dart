@@ -2,10 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ez2gether/utils/random_generator_util.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   Future<void> signInAnonymously() async {
     try {
       await _firebaseAuth.signInAnonymously();
@@ -60,6 +61,27 @@ class FirebaseAuthService {
       debugPrint(e.toString());
       rethrow;
     }
+  }
+
+  Future<UserCredential?> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    if (googleUser != null) {
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      try {
+        final userCredential =
+            await _firebaseAuth.signInWithCredential(credential);
+        return userCredential;
+      } catch (e) {
+        debugPrint(e.toString());
+        rethrow;
+      }
+    }
+    return null;
   }
 
   Future<QuerySnapshot> getRoomDetails(String roomId) {
