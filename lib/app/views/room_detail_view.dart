@@ -1,10 +1,15 @@
+import 'dart:io';
+
+import 'package:ez2gether/app/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ez2gether/app/services/firebase_auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:ez2gether/app/providers/other_provider.dart'; // Import the other_provider file
 
-class RoomDetailsScreen extends StatelessWidget {
+class RoomDetailsScreen extends ConsumerWidget {
   final String roomId;
   final String docId;
   final FirebaseAuthService auth = FirebaseAuthService();
@@ -13,7 +18,43 @@ class RoomDetailsScreen extends StatelessWidget {
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final dayState = ref.watch(dayStateProvider);
+    final userAsyncValue = ref.watch(authStateChangesProvider);
+
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      userAsyncValue.whenData((user) {
+        if (user != null) {
+          auth.getHandleName(roomId, user.uid).then((handleName) {
+            if (handleName == null) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  String newHandleName = '';
+                  return AlertDialog(
+                    title: const Text('Set your handle name'),
+                    content: TextField(
+                      onChanged: (value) {
+                        newHandleName = value;
+                      },
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        child: const Text('OK'),
+                        onPressed: () {
+                          auth.addHandleName(roomId, user.uid, newHandleName);
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              );
+            }
+          });
+        }
+      });
+    });
     return Scaffold(
       appBar: AppBar(
         title: const Text('Room Details'),
@@ -32,7 +73,7 @@ class RoomDetailsScreen extends StatelessWidget {
               var title = roomDetails['title'];
               var startDate = (roomDetails['startDate'] as Timestamp).toDate();
               var endDate = (roomDetails['endDate'] as Timestamp).toDate();
-              var dueDate = (roomDetails['dueDate'] as Timestamp).toDate();
+              var dueDate = (roomDetails['deadline'] as Timestamp).toDate();
               var note = roomDetails['note'];
               var hostUid = roomDetails['uid'];
               var password = roomDetails['password'];
@@ -40,7 +81,7 @@ class RoomDetailsScreen extends StatelessWidget {
 
               var dueDateFormatted = DateFormat('MM/dd/yyyy').format(dueDate);
 
-              var isHost = hostUid == auth.currentUserUid();
+              var isHost = hostUid;
 
               return Column(
                 children: <Widget>[
@@ -74,9 +115,17 @@ class RoomDetailsScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        // Add the host and member list here
-                        // Use appropriate widgets to display the list
-                        const Text("Host and Members")
+                        userAsyncValue.when(
+                          data: (user) {
+                            if (user != null) {
+                              return Text('Logged in as: ${user.uid}');
+                            } else {
+                              return const Text('Not logged in');
+                            }
+                          },
+                          loading: () => const CircularProgressIndicator(),
+                          error: (error, stackTrace) => Text('Error: $error'),
+                        )
                       ],
                     ),
                   ),
@@ -92,9 +141,17 @@ class RoomDetailsScreen extends StatelessWidget {
                       CalendarFormat.week: 'Week',
                       CalendarFormat.twoWeeks: '2 Weeks',
                     },
-                    onFormatChanged: (format) {
-                      // do something when format changes
-                      // e.g., you could trigger a state update here
+                    onFormatChanged: (format) {},
+                    onDaySelected: (selectedDay, focusedDay) {
+                      ref
+                          .read(dayStateProvider.notifier)
+                          .onDaySelected(selectedDay);
+                    },
+                    onHeaderTapped: (focusedDay) {
+                      ref
+                          .read(dayStateProvider.notifier)
+                          .onHeaderTapped(focusedDay.weekday);
+                      debugPrint(focusedDay.weekday.toString());
                     },
                   ),
                 ],

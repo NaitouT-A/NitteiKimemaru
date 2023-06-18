@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:ez2gether/app/providers/other_provider.dart';
 import 'package:ez2gether/app/services/firebase_auth_service.dart';
-import 'package:flutter/services.dart';
 import 'package:ez2gether/app/router/router.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
 
 class CreateScheduleView extends ConsumerStatefulWidget {
   const CreateScheduleView({Key? key}) : super(key: key);
@@ -17,6 +18,7 @@ class CreateScheduleViewState extends ConsumerState<CreateScheduleView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  final TextEditingController _handleController = TextEditingController();
   final DateFormat _dateFormatter = DateFormat('yyyy-MM-dd');
 
   DateTime? _startDate;
@@ -27,6 +29,7 @@ class CreateScheduleViewState extends ConsumerState<CreateScheduleView> {
   void dispose() {
     _titleController.dispose();
     _noteController.dispose();
+    _handleController.dispose();
     super.dispose();
   }
 
@@ -266,9 +269,8 @@ class CreateScheduleViewState extends ConsumerState<CreateScheduleView> {
                         dueDate: _dueDate!,
                         note: _noteController.text,
                       );
-                      _showDialog(context, result, () {
-                        Navigator.of(context).pop();
-                      });
+
+                      _showDialog(context, result);
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -293,30 +295,66 @@ class CreateScheduleViewState extends ConsumerState<CreateScheduleView> {
   }
 }
 
-void _showDialog(
-    BuildContext context, Map<String, String> result, VoidCallback onCopy) {
+_showDialog(BuildContext context, Map<String, String> result) {
   showDialog(
     context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text("ルームIDとパスワード"),
-        content: SelectableText(
-          'ルームID：${result['roomid']} パスワード：${result['password']}',
-        ),
-        actions: <Widget>[
-          TextButton(
-            child: const Text("コピー"),
-            onPressed: () {
-              // クリップボードにコピーします
-              Clipboard.setData(ClipboardData(
-                  text:
-                      'ルームID：${result['roomid']} パスワード：${result['password']}'));
-              onCopy();
-              goRouter.go('/${result['roomid']}/${result['docId']}');
+    builder: (context) => AlertDialog(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+      ),
+      title: const Text("ルームIDとパスワード",
+          style: TextStyle(
+              color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 24)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('ルームID：${result['roomid']}',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text('パスワード：${result['password']}',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.copy),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(
+                      text:
+                          'ルームID：${result['roomid']} パスワード：${result['password']}'));
+                },
+              ),
+            ],
+          ),
+          const Text("Googleアカウントでログインをすると予定をいつでも保存できます"),
+          SignInButton(
+            Buttons.Google,
+            text: "Googleでログイン",
+            onPressed: () async {
+              final user = await FirebaseAuthService().signInWithGoogle();
+              if (user != null) {
+                debugPrint("Logged in as ${user.displayName}");
+              } else {
+                debugPrint("Failed to log in with Google");
+              }
             },
           ),
         ],
-      );
-    },
+      ),
+      actions: <Widget>[
+        TextButton(
+          child: const Text("予定へ進む"),
+          onPressed: () {
+            Navigator.of(context).pop();
+            goRouter.go('/${result['roomid']}/${result['docId']}');
+          },
+        ),
+      ],
+    ),
   );
 }

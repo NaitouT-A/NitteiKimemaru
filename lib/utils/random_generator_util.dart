@@ -2,10 +2,12 @@ import 'dart:math';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
-int getRandomRoomId() {
+String getRandomRoomId() {
   var rng = Random();
-  return 1000000000 +
-      rng.nextInt(9000000000); // Generates a random 10 digit number
+  int firstPart =
+      1 + rng.nextInt(9); // Generates a random number between 1 and 9
+  int secondPart = rng.nextInt(1000000000); // Generates a random 9 digit number
+  return '$firstPart$secondPart'; // Concatenate the two parts to form a 10 digit number
 }
 
 String getRandomRoomPassword() {

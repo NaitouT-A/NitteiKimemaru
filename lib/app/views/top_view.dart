@@ -73,7 +73,7 @@ class MyHomePage extends ConsumerWidget {
               width: MediaQuery.of(context).size.width * 0.5,
               child: ElevatedButton(
                 onPressed: () {
-                  _showJoinScheduleDialog(context);
+                  _showJoinScheduleDialog(context, ref);
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -96,16 +96,66 @@ class MyHomePage extends ConsumerWidget {
   }
 }
 
-void _showJoinScheduleDialog(BuildContext context) {
+void _showJoinScheduleDialog(BuildContext context, WidgetRef ref) {
+  final TextEditingController roomIdController = TextEditingController();
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
         title: const Text('予定に参加する'),
         content: TextField(
-          onChanged: (value) {},
+          controller: roomIdController,
           decoration: const InputDecoration(
-            hintText: "予定のURLを入力",
+            hintText: "ルームIDを入力",
+          ),
+          keyboardType: TextInputType.number,
+        ),
+        actions: [
+          TextButton(
+            child: const Text('キャンセル'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              String roomId = roomIdController.text.trim();
+              bool roomExists =
+                  await ref.read(firebaseAuthProvider).roomExists(roomId);
+              if (roomExists) {
+                Navigator.of(context).pop();
+                _showPasswordDialog(context, roomId, ref);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('該当のルームは存在しません。'),
+                ));
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            child: const Text('参加する'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _showPasswordDialog(BuildContext context, String roomId, WidgetRef ref) {
+  final TextEditingController passwordController = TextEditingController();
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('パスワードを入力してください'),
+        content: TextField(
+          controller: passwordController,
+          obscureText: true,
+          decoration: const InputDecoration(
+            hintText: "パスワードを入力",
           ),
         ),
         actions: [
@@ -116,15 +166,29 @@ void _showJoinScheduleDialog(BuildContext context) {
             },
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
+            onPressed: () async {
+              String password = passwordController.text.trim();
+              bool passwordIsCorrect = await ref
+                  .read(firebaseAuthProvider)
+                  .verifyPassword(roomId, password);
+              if (passwordIsCorrect) {
+                Navigator.of(context).pop();
+                String docId = await ref
+                    .read(firebaseAuthProvider)
+                    .getDocumentIdFromRoomId(roomId);
+                context.go('/$roomId/$docId');
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('パスワードが間違っています。'),
+                ));
+              }
             },
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
             ),
-            child: const Text('参加する'),
+            child: const Text('OK'),
           ),
         ],
       );
